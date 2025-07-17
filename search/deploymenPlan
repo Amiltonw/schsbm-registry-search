@@ -1,0 +1,65 @@
+The most streamlined approach involves using Continuous Deployment (CD) directly from your source code repository, such as
+  GitHub.
+
+  Here's how it generally works, simplifying many of the manual Docker and Azure CLI steps:
+
+
+   1. Prepare Your Django Application for Production (Same as before):
+       * Ensure DEBUG = False in nrn_search/settings.py.
+       * Update ALLOWED_HOSTS to include your Azure App Service domain.
+       * Configure STATIC_ROOT and run python manage.py collectstatic.
+       * Your Dockerfile should be ready for production (e.g., using Gunicorn).
+
+
+   2. Push Your Code to a GitHub Repository:
+       * Make sure your entire project, including the Dockerfile, is committed and pushed to a GitHub repository.
+
+
+   3. Create Azure App Service (Web App for Containers):
+       * In the Azure Portal, create a new "App Service".
+       * When configuring, choose "Docker Container" as the publish method.
+       * Select "Linux" as the operating system.
+       * For the "Image Source", you'll eventually connect to your GitHub repository.
+
+
+   4. Set up Continuous Deployment from GitHub:
+       * Once your App Service is created, navigate to it in the Azure Portal.
+       * Go to "Deployment Center" (or "Deployment slots" if you're using them).
+       * Select "GitHub" as your source control.
+       * Authorize Azure to access your GitHub account.
+       * Choose your repository and the branch you want to deploy from (e.g., main or master).
+       * Azure will detect your Dockerfile and automatically set up a GitHub Actions workflow. This workflow will:
+           * Trigger on pushes to your selected branch.
+           * Build your Docker image.
+           * Push the image to a new or existing Azure Container Registry (ACR) that Azure automatically sets up for you.
+           * Deploy the new image to your Azure App Service.
+
+
+   5. Configure App Service Environment Variables:
+       * In the Azure Portal, go to your App Service, then "Configuration" -> "Application settings".
+       * Add your database connection strings (host, user, password, name) and Django's SECRET_KEY as environment variables. These are crucial
+         for your Django app to connect to the database and run securely.
+
+
+   6. Set up Azure Database for PostgreSQL (Still a separate step):
+       * You'll still need to create and configure your Azure Database for PostgreSQL Flexible Server separately in the Azure Portal, as
+         described in the previous detailed steps.
+       * Ensure its firewall rules allow connections from your Azure App Service.
+
+
+   7. Run Initial Migrations and Create Superuser:
+       * After the first successful deployment via CD, you'll need to run your Django migrations and create a superuser. You can do this by
+         connecting to your App Service's SSH console via the Azure Portal or Azure CLI.
+
+  Benefits of this simpler approach:
+
+
+   * Automation: Every time you push changes to your GitHub repository, Azure automatically builds and deploys your application.
+   * Less Manual Intervention: You don't need to manually build Docker images, tag them, or push them to a registry yourself after the initial
+     setup.
+   * Integrated Workflow: Azure provides a seamless experience from code to deployment.
+
+
+  This method significantly reduces the manual overhead compared to running individual Docker commands and Azure CLI commands for each
+  deployment.
+

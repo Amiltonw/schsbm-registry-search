@@ -1,0 +1,110 @@
+import pandas as pd
+from pathlib import Path
+
+# ──────────────────────────────────────────────────────────────
+# 0.  Canonicalise headers
+# ──────────────────────────────────────────────────────────────
+def tidy_cols(df: pd.DataFrame) -> pd.DataFrame:
+    df.columns = (
+        df.columns
+          .str.strip()
+          .str.upper()
+          .str.replace(r'\s+', '_', regex=True)
+    )
+    return df
+
+# ──────────────────────────────────────────────────────────────
+# 1.  Load both files and tag with YEAR
+# ──────────────────────────────────────────────────────────────
+FILES = {
+    2021: '/content/National Register 2021.csv',
+    2025: '/content/National RegisterMay.csv',
+}
+
+frames = []
+for yr, path in FILES.items():
+    tmp = pd.read_csv(Path(path), encoding='latin1', dtype=str)
+    tmp['YEAR'] = yr                       # ← add YEAR column
+    frames.append(tidy_cols(tmp))
+
+df = pd.concat(frames, ignore_index=True)
+
+# put YEAR first in the canonical column order
+df = df[['YEAR', *[c for c in df.columns if c != 'YEAR']]]
+
+print("Rows loaded per YEAR:\n", df['YEAR'].value_counts().sort_index(), "\n")
+
+# ──────────────────────────────────────────────────────────────
+# 2.  Mandatory-column check
+# ──────────────────────────────────────────────────────────────
+required = {'FIRST_NAME', 'SURNAME', 'NRN'}
+missing = required - set(df.columns)
+if missing:
+    raise KeyError(f"Missing mandatory column(s): {missing}")
+
+# ──────────────────────────────────────────────────────────────
+# 3.  Helper columns
+# ──────────────────────────────────────────────────────────────
+strip_low = lambda s: ' '.join(str(s).lower().split()) if pd.notna(s) else ''
+df['FIRST_NORM'] = df['FIRST_NAME'].map(strip_low)
+df['LAST_NORM']  = df['SURNAME'].map(strip_low)
+
+def _norm_nrn(raw):
+    if pd.isna(raw):
+        return ''
+    s = str(raw).replace('-', '').strip()
+    return s.zfill(10) if s.isdigit() else s
+df['NRN_NORM'] = df['NRN'].map(_norm_nrn)
+
+# ──────────────────────────────────────────────────────────────
+# 4a.  Search by name fragments (sorted, YEAR first)
+# ──────────────────────────────────────────────────────────────
+def search_names(first_fragment: str = '',
+                 last_fragment : str = '',
+                 show_max: int | None = None) -> pd.DataFrame:
+    f_frag = first_fragment.lower().strip()
+    l_frag = last_fragment.lower().strip()
+
+    mask = True
+    if f_frag:
+        mask &= df['FIRST_NORM'].str.contains(f_frag, na=False)
+    if l_frag:
+        mask &= df['LAST_NORM'].str.contains(l_frag, na=False)
+
+    hits = (df.loc[mask]
+              .sort_values('NRN_NORM')   # ← sort by ID number
+              .drop(columns=['FIRST_NORM', 'LAST_NORM', 'NRN_NORM'])
+           )
+
+    _print_hits(hits, show_max,
+                f"first='{first_fragment or '*'}', last='{last_fragment or '*'}'")
+    return hits
+
+# ──────────────────────────────────────────────────────────────
+# 4b.  Search by NRN fragment (sorted, YEAR first)
+# ──────────────────────────────────────────────────────────────
+def search_nrn(nrn_fragment: str,
+               show_max: int | None = None) -> pd.DataFrame:
+    frag = nrn_fragment.replace('-', '').strip()
+    mask = df['NRN_NORM'].str.contains(frag, na=False, case=False)
+
+    hits = (df.loc[mask]
+              .sort_values('NRN_NORM')   # ← sort by ID number
+              .drop(columns=['FIRST_NORM', 'LAST_NORM', 'NRN_NORM'])
+           )
+
+    _print_hits(hits, show_max, f"NRN fragment='{nrn_fragment}'")
+    return hits
+
+# ──────────────────────────────────────────────────────────────
+# 5.  Utility printer
+# ──────────────────────────────────────────────────────────────
+def _print_hits(hits: pd.DataFrame, show_max: int | None, label: str):
+    if hits.empty:
+        print(f"⚠️  No matches for {label}.")
+        return
+    to_show = hits if show_max is None else hits.head(show_max)
+    print(to_show.to_string(index=False))
+    if show_max is not None and len(hits) > show_max:
+        print(f"… (showing first {show_max} of {len(hits)} matches)")
+    print(f"🔎 Total matches: {len(hits)} for {label}\n")

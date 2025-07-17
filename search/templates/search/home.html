@@ -1,0 +1,61 @@
+{% extends 'search/base.html' %}
+
+{% block content %}
+    <div id="content-main">
+        <form action="" method="post" id="login-form">
+            {% csrf_token %}
+            <div class="form-row">
+                <label class="required" for="id_username">Username:</label>
+                <input type="text" name="username" id="id_username" required>
+            </div>
+            <div class="form-row">
+                <label class="required" for="id_password">Password:</label>
+                <input type="password" name="password" id="id_password" required>
+            </div>
+            <div class="submit-row">
+                <input type="submit" value="Log in">
+            </div>
+        </form>
+        <div id="login-feedback"></div>
+    </div>
+
+    <script>
+        const feedbackDiv = document.getElementById('login-feedback');
+        const usernameInput = document.querySelector('#login-form input[name="username"]');
+        const passwordInput = document.querySelector('#login-form input[name="password"]');
+
+        function clearFeedback() {
+            feedbackDiv.innerHTML = '';
+        }
+
+        usernameInput.addEventListener('input', clearFeedback);
+        passwordInput.addEventListener('input', clearFeedback);
+
+        document.getElementById('login-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const form = event.target;
+            const formData = new FormData(form);
+
+            fetch('{% url "login" %}', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    window.location.href = '/';
+                } else {
+                    response.json().then(data => {
+                        feedbackDiv.innerHTML = `<p class="errornote">${data.error}</p>`;
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                feedbackDiv.innerHTML = '<p class="errornote">An error occurred. Please try again.</p>';
+            });
+        });
+    </script>
+{% endblock %}

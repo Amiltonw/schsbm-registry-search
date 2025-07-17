@@ -1,0 +1,13 @@
+Login server: schsbmacr-g6bthva7cngmeubv.azurecr.io
+ Registry domain name: schsbmacr-g6bthva7cngmeubv.azurecr.io
+ Registry name: schsbmacr
+Resource group:SurveyRG
+
+   4. Image:
+       * Enter: `nrnsearch-web`
+       * Explanation: This is the name of the image you built and pushed to your ACR (e.g., schsbmacr.azurecr.io/nrnsearch-web:latest).
+
+
+   5. Tag:
+       * Enter: `latest`
+       * Explanation: This is the tag you applied to your image when you pushed it.

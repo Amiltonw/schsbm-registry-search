@@ -1,0 +1,80 @@
+{% extends 'search/base.html' %}
+
+{% block content %}
+    <h1>Data Load</h1>
+    
+    {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <p>This page is for administrators to load data.</p>
+    
+    <h2>Upload CSV File for Preview</h2>
+    <form action="{% url 'import_data' %}" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="file" name="csv_file" accept=".csv" required>
+        <button type="submit" name="preview_csv">Preview Data</button>
+    </form>
+
+    {% if preview_data %}
+        <h2>CSV Preview (First 50 Rows)</h2>
+        <p>Review the data below. If it looks correct, click "Load Data" to import all records.</p>
+        <table>
+            <thead>
+                <tr>
+                    {% for header in preview_data.0.keys %}
+                        <th>{{ header }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in preview_data %}
+                    <tr>
+                        {% for value in row.values %}
+                            <td>{{ value }}</td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <form action="{% url 'import_data' %}" method="post">
+            {% csrf_token %}
+            <button type="submit" name="load_confirmed">Load Data</button>
+        </form>
+    {% endif %}
+
+    <h3>Expected CSV Format:</h3>
+    <p>The CSV file should contain the following columns (case-sensitive):</p>
+    <ul>
+        <li>NRN</li>
+        <li>SURNAME</li>
+        <li>FIRST NAME</li>
+        <li>MIDDLE NAMES (Optional)</li>
+        <li>SEX (M/F)</li>
+        <li>DOB (format: MM/DD/YYYY, e.g., 10/22/2024)</li>
+        <li>ADDRESS_LINE_1</li>
+        <li>ADDRESS_LINE_2 (Optional)</li>
+        <li>ADDRESS_LINE_3 (Optional)</li>
+        <li>TOWN</li>
+        <li>PARISH</li>
+        <li>POSTCODE (Optional)</li>
+        <li>TELEPHONE_NUMBER (Optional)</li>
+        <li>YEAR (Optional - if not provided, current year will be used)</li>
+    </ul>
+    <p>Download a sample CSV file: <a href="/static/search/sample.csv" download>sample.csv</a></p>
+
+    <h2>Records by Year</h2>
+    {% if record_counts %}
+        <ul>
+            {% for entry in record_counts %}
+                <li>Year: {{ entry.year }} - Records: {{ entry.count }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No records found.</p>
+    {% endif %}
+{% endblock %}

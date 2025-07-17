@@ -1,0 +1,11 @@
+Django
+pandas
+psycopg2-binary
+
+uwiadmin
+uwi@2025
+az acr build \
+     --resource-group SurveyRG \
+    --registry schsbm-nrn-search \
+   --image nrnsearch-web:latest \.
+ 

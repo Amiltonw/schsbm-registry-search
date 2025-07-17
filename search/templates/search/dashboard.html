@@ -1,0 +1,21 @@
+{% extends 'search/base.html' %}
+
+{% block content %}
+    <h1>National Register Search</h1>
+    <h2>Welcome to your Dashboard, {{ user.username }}!</h2>
+
+    {% if user.is_superuser %}
+        <p>As an administrator, you have access to:</p>
+        <ul>
+            <li><a href="{% url 'admin:index' %}">Django Admin Interface</a></li>
+            <li><a href="{% url 'data_load' %}">Load Data Page</a></li>
+        </ul>
+    {% else %}
+        <p>You can use the search functionality:</p>
+    {% endif %}
+
+    <ul>
+        <li><a href="{% url 'search_names' %}">Search by Name</a></li>
+        <li><a href="{% url 'search_nrn' %}">Search by NRN</a></li>
+    </ul>
+{% endblock %}

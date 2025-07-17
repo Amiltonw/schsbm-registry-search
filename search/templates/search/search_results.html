@@ -1,0 +1,111 @@
+{% extends 'search/base.html' %}
+
+{% block content %}
+    <h1>National Register Search</h1>
+    <h2>Search by Name</h2>
+    <form action="{% url 'search_names' %}" method="get">
+        <input type="text" name="first_fragment" placeholder="First Name" value="{{ first_fragment }}">
+        <input type="text" name="last_fragment" placeholder="Last Name" value="{{ last_fragment }}">
+        <button type="submit">Search</button>
+        <button type="button" onclick="window.location.href='{% url 'search_names' %}'">Clear</button>
+    </form>
+
+    <h2>Search by NRN</h2>
+    <form action="{% url 'search_nrn' %}" method="get">
+        <input type="text" name="nrn_fragment" placeholder="NRN" value="{{ nrn_fragment }}">
+        <button type="submit">Search</button>
+        <button type="button" onclick="window.location.href='{% url 'search_nrn' %}'">Clear</button>
+    </form>
+
+    <hr>
+
+    {% if results %}
+        <h3>Results</h3>
+        <p>Found {{ results.count }} record{{ results.count|pluralize }}.</p>
+        {% if truncated %}
+            <p>Displaying first 50 results. Please refine your search for more specific results.</p>
+        {% endif %}
+        <input type="text" id="searchInput" onkeyup="searchTable()" placeholder="Search for names..">
+        <table>
+            <thead>
+                <tr>
+                    <th>Year</th>
+                    <th>First Name</th>
+                    <th>Middle Name</th>
+                    <th>Surname</th>
+                    <th>NRN</th>
+                    <th>Sex</th>
+                    <th>Date of Birth</th>
+                    <th>Age</th>
+                    <th>Address Line 1</th>
+                    <th>Address Line 2</th>
+                    <th>Address Line 3</th>
+                    <th>Town</th>
+                    <th>Parish</th>
+                    <th>Postcode</th>
+                    <th>Telephone Number</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in results %}
+                    <tr>
+                        <td>{{ record.year }}</td>
+                        <td>{{ record.first_name }}</td>
+                        <td>{{ record.middle_name }}</td>
+                        <td>{{ record.surname }}</td>
+                        <td>{{ record.nrn }}</td>
+                        <td>{{ record.sex }}</td>
+                        <td>{{ record.date_of_birth|date:"d/m/Y" }}</td>
+                        <td>{{ record.age|default:"N/A" }}</td>
+                        <td>{{ record.address_line_1 }}</td>
+                        <td>{{ record.address_line_2 }}</td>
+                        <td>{{ record.address_line_3 }}</td>
+                        <td>{{ record.town }}</td>
+                        <td>{{ record.parish }}</td>
+                        <td>{{ record.postcode }}</td>
+                        <td>{{ record.telephone_number }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+<script>
+function searchTable() {
+  // Declare variables
+  var input, filter, table, tr, td, i, txtValue;
+  input = document.getElementById("searchInput");
+  filter = input.value.toUpperCase();
+  table = document.querySelector("table");
+  tr = table.getElementsByTagName("tr");
+
+  // Loop through all table rows, and hide those who don't match the search query
+  for (i = 0; i < tr.length; i++) {
+    // Skip the header row
+    if (tr[i].getElementsByTagName("th").length > 0) {
+      continue;
+    }
+    td = tr[i].getElementsByTagName("td");
+    let match = false;
+    for (let j = 0; j < td.length; j++) {
+        if (td[j]) {
+            txtValue = td[j].textContent || td[j].innerText;
+            if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                match = true;
+                break;
+            }
+        }
+    }
+    if (match) {
+        tr[i].style.display = "";
+    } else {
+        tr[i].style.display = "none";
+    }
+  }
+}
+</script>
+    {% elif request.GET %}
+        <p>No results found for your search criteria.</p>
+    {% else %}
+        <p>Enter search criteria above to find records.</p>
+    {% endif %}
+{% endblock %}

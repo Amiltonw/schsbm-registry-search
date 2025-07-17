@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>National Register Search</title>
+    <link rel="stylesheet" type="text/css" href="/static/admin/css/base.css">
+    <link rel="stylesheet" type="text/css" href="/static/admin/css/forms.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 20px; /* Add padding to all sides */
+            background: #f8f8f8;
+        }
+        #container {
+            padding: 20px;
+        }
+        h1 {
+            margin-top: 0;
+            text-align: center;
+            text-decoration: none;
+        }
+        nav ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #417690; /* Light blue, similar to Django admin header */
+        }
+        nav li {
+            float: left;
+        }
+        nav li a {
+            display: block;
+            color: white !important;
+            text-align: center;
+            padding: 14px 16px;
+            text-decoration: none;
+        }
+        nav li a:hover {
+            background-color: #33667f; /* Slightly darker blue on hover */
+        }
+        #session-timeout-warning {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: #ffc107; /* Warning yellow */
+            color: #343a40;
+            text-align: center;
+            padding: 10px;
+            z-index: 1000;
+            display: none; /* Hidden by default */
+        }
+    </style>
+</head>
+<body>
+    <div id="session-timeout-warning">Your session will expire soon due to inactivity. Please refresh the page or log in again.</div>
+    {% if user.is_authenticated and not is_login_page %}
+        <nav>
+            <ul>
+                <li><a href="{% url 'dashboard' %}">Home</a></li>
+                <li><a href="{% url 'search_names' %}">Search</a></li>
+                {% if user.is_superuser %}
+                    <li><a href="{% url 'admin:index' %}">Django User Admin</a></li>
+                    <li><a href="{% url 'data_load' %}">Load Data</a></li>
+                {% endif %}
+                <li>
+                    <form action="{% url 'logout' %}" method="post" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" style="background: none; border: none; color: white !important; padding: 14px 16px; cursor: pointer; font-size: 1em;">Logout</button>
+                    </form>
+                </li>
+            </ul>
+        </nav>
+    {% endif %}
+    <hr>
+    {% block content %}
+    {% endblock %}
+
+    <script>
+        {% if user.is_authenticated %}
+        const SESSION_TIMEOUT = {{ settings.SESSION_COOKIE_AGE }} * 1000; // Convert to milliseconds
+        const WARNING_TIME = 10 * 1000; // Warn 10 seconds before timeout
+        let timeoutTimer;
+        let warningTimer;
+
+        function startSessionTimers() {
+            clearTimeout(timeoutTimer);
+            clearTimeout(warningTimer);
+
+            timeoutTimer = setTimeout(function() {
+                window.location.href = '{% url "login" %}?next={{ request.path }}';
+            }, SESSION_TIMEOUT);
+
+            warningTimer = setTimeout(function() {
+                document.getElementById('session-timeout-warning').style.display = 'block';
+            }, SESSION_TIMEOUT - WARNING_TIME);
+        }
+
+        // Restart timers on user activity
+        document.addEventListener('mousemove', startSessionTimers);
+        document.addEventListener('keypress', startSessionTimers);
+        document.addEventListener('scroll', startSessionTimers);
+        document.addEventListener('click', startSessionTimers);
+
+        // Initial start of timers
+        startSessionTimers();
+        {% endif %}
+    </script>
+</body>
+</html>
