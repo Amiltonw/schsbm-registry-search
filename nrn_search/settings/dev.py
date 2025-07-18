@@ -1,9 +1,9 @@
 from .base import *
 import os
 
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['schsbmnationalregister-bbegcabze6b3dnea.canadacentral-01.azurewebsites.net']
 #why
 # Database for local development
 DATABASES = {
