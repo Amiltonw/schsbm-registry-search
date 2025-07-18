@@ -1,27 +1,13 @@
 from .base import *
 import os
 
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
 
-# Database for production
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('DB_NAME'),
-        'USER': os.environ.get('DB_USER'),
-        'PASSWORD': os.environ.get('DB_PASSWORD'),
-        'HOST': os.environ.get('DB_HOST'),
-        'PORT': os.environ.get('DB_PORT', '5432'),
-    }
-}
-
 SECRET_KEY = os.environ.get('SECRET')
 
-# Azure Storage settings for static and media files
-INSTALLED_APPS += ['storages']
-
+# Database for production (using AZURE_POSTGRESQL_CONNECTIONSTRING)
 conn_str = os.environ['AZURE_POSTGRESQL_CONNECTIONSTRING']
 conn_str_params = {pair.split('=')[0]: pair.split('=')[1] for pair in conn_str.split(' ')}
 
@@ -34,14 +20,13 @@ DATABASES = {
         'PASSWORD': conn_str_params['password'],
     }
 }
-STATICFILES_LOCATION = 'static'
-MEDIAFILES_LOCATION = 'media'
 
-STATIC_URL = f'https://{AZURE_STORAGE_ACCOUNT_NAME}.blob.core.windows.net/{STATICFILES_LOCATION}/'
-MEDIA_URL = f'https://{AZURE_STORAGE_ACCOUNT_NAME}.blob.core.windows.net/{MEDIAFILES_LOCATION}/'
+# Local static and media files for Windows deployment
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR.parent.parent / 'static_collected' # Path to collect static files
 
-DEFAULT_FILE_STORAGE = 'nrn_search.custom_azure.AzureMediaStorage'
-STATICFILES_STORAGE = 'nrn_search.custom_azure.AzureStaticStorage'
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR.parent.parent / 'media' # Path for user-uploaded media files
 
 # Security settings (adjust as needed for your production environment)
 SECURE_SSL_REDIRECT = True
