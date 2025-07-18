@@ -4,7 +4,7 @@ import os
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
+#why
 # Database for local development
 DATABASES = {
     'default': {
