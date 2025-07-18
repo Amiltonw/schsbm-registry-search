@@ -11,6 +11,6 @@ import os
 
 from django.core.asgi import get_asgi_application
 
-os.environ['DJANGO_SETTINGS_MODULE'] = os.environ.get('DJANGO_SETTINGS_MODULE', 'nrn_search.settings.prod')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'nrn_search.settings')
 
 application = get_asgi_application()
