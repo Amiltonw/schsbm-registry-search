@@ -17,7 +17,7 @@ DATABASES = {
     }
 }
 
-SECRET_KEY = os.environ.get('SECRET_KEY')
+SECRET_KEY = os.environ.get('SECRET')
 
 # Azure Storage settings for static and media files
 INSTALLED_APPS += ['storages']
