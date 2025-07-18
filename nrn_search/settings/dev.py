@@ -4,6 +4,7 @@ import os
 DEBUG = False
 
 ALLOWED_HOSTS = ['schsbmnationalregister-bbegcabze6b3dnea.canadacentral-01.azurewebsites.net']
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 #why
 # Database for local development
 DATABASES = {
