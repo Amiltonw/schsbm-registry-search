@@ -30,6 +30,7 @@
             <thead>
                 <tr>
                     <th>Year</th>
+                    <th>Full Name</th>
                     <th>First Name</th>
                     <th>Middle Name</th>
                     <th>Surname</th>
@@ -37,39 +38,65 @@
                     <th>Sex</th>
                     <th>Date of Birth</th>
                     <th>Age</th>
-                    <th>Address Line 1</th>
                     <th>Address Line 2</th>
                     <th>Address Line 3</th>
-                    <th>Town</th>
                     <th>Parish</th>
-                    <th>Postcode</th>
-                    <th>Telephone Number</th>
                 </tr>
             </thead>
             <tbody>
                 {% for record in results %}
                     <tr>
                         <td>{{ record.year }}</td>
+                        <td>{{ record.first_name }} {{ record.middle_name }} {{ record.surname }}<button class="copy-btn" onclick="copyToClipboard('{{ record.first_name }} {{ record.middle_name }} {{ record.surname }}', this)" title="Copy full name"><i class="far fa-copy"></i></button></td>
                         <td>{{ record.first_name }}</td>
                         <td>{{ record.middle_name }}</td>
                         <td>{{ record.surname }}</td>
-                        <td>{{ record.nrn }}</td>
+                        <td>{{ record.nrn }}<button class="copy-btn" onclick="copyToClipboard('{{ record.nrn }}', this)" title="Copy NRN"><i class="far fa-copy"></i></button></td>
                         <td>{{ record.sex }}</td>
                         <td>{{ record.date_of_birth|date:"d/m/Y" }}</td>
                         <td>{{ record.age|default:"N/A" }}</td>
-                        <td>{{ record.address_line_1 }}</td>
                         <td>{{ record.address_line_2 }}</td>
                         <td>{{ record.address_line_3 }}</td>
-                        <td>{{ record.town }}</td>
                         <td>{{ record.parish }}</td>
-                        <td>{{ record.postcode }}</td>
-                        <td>{{ record.telephone_number }}</td>
                     </tr>
                 {% endfor %}
             </tbody>
         </table>
 
+<style>
+    .copy-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        margin-left: 5px;
+    }
+    .copy-btn i {
+        font-size: 1.2em;
+        color: #417690;
+    }
+    .copy-feedback {
+        display: inline-block;
+        margin-left: 5px;
+        color: green;
+        font-weight: bold;
+    }
+</style>
+
 <script>
+function copyToClipboard(text, btn) {
+    navigator.clipboard.writeText(text).then(function() {
+        var feedback = document.createElement('span');
+        feedback.className = 'copy-feedback';
+        feedback.textContent = 'Copied!';
+        btn.parentNode.insertBefore(feedback, btn.nextSibling);
+        setTimeout(function() {
+            feedback.remove();
+        }, 2000);
+    }, function(err) {
+        console.error('Could not copy text: ', err);
+    });
+}
+
 function searchTable() {
   // Declare variables
   var input, filter, table, tr, td, i, txtValue;

@@ -12,4 +12,5 @@ load_dotenv(dotenv_path=env_path)
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'nrn_search.settings')
 
+import numpy
 application = get_wsgi_application()
