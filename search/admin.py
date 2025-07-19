@@ -10,6 +10,7 @@ class UserProfileInline(admin.StackedInline):
 
 class CustomUserAdmin(UserAdmin):
     inlines = (UserProfileInline, )
+    add_fieldsets = UserAdmin.add_fieldsets + (('Personal info', {'fields': ('first_name', 'last_name', 'email')}),)
 
 admin.site.unregister(User)
 admin.site.register(User, CustomUserAdmin)

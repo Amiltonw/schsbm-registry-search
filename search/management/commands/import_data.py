@@ -49,7 +49,7 @@ class Command(BaseCommand):
 
                 # Convert DATE_OF_BIRTH to datetime objects
                 if 'DATE_OF_BIRTH' in tmp.columns:
-                    tmp['DATE_OF_BIRTH'] = pd.to_datetime(tmp['DATE_OF_BIRTH'], format='%d/%m/%Y', errors='coerce').dt.date
+                    tmp['DATE_OF_BIRTH'] = pd.to_datetime(tmp['DATE_OF_BIRTH'], format=['%d/%m/%Y', '%m/%d/%Y'], errors='coerce').dt.date
 
                 for _, row in tmp.iterrows():
                     NationalRegister.objects.create(
