@@ -45,6 +45,12 @@ class Command(BaseCommand):
                     return s.zfill(10)
             tmp['NRN_NORM'] = tmp['NRN'].map(_norm_nrn)
 
+            # Remove duplicates based on NRN and YEAR before processing
+            initial_rows = len(tmp)
+            tmp.drop_duplicates(subset=['NRN', 'YEAR'], keep='first', inplace=True)
+            if len(tmp) < initial_rows:
+                self.stdout.write(self.style.WARNING(f"Removed {initial_rows - len(tmp)} duplicate records from CSV based on NRN and YEAR."))
+
             # Convert DATE_OF_BIRTH to datetime objects
             # Strictly expecting dd/mm/yyyy format, will raise error if not
             if 'DOB' in tmp.columns: # Assuming the column name in CSV is 'DOB'
