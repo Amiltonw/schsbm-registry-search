@@ -55,28 +55,33 @@ class Command(BaseCommand):
 
             # Map CSV columns to model fields
             self.stdout.write("Starting data import...")
+            records_to_create = []
             total_records = len(tmp)
+
             for i, row in tmp.iterrows():
-                    NationalRegister.objects.update_or_create(
-                        nrn=row.get('NRN'),
-                        year=row['YEAR'],
-                        defaults={
-                            'first_name': row.get('FIRST_NAME'),
-                            'middle_name': row.get('MIDDLE_NAMES'),
-                            'surname': row.get('SURNAME'),
-                            'sex': row.get('SEX'),
-                            'date_of_birth': row.get('DATE_OF_BIRTH'),
-                            'address_line_2': row.get('ADDRESS_LINE_2'),
-                            'address_line_3': row.get('ADDRESS_LINE_3'),
-                            'parish': row.get('PARISH'),
-                            'first_norm': row.get('FIRST_NORM'),
-                            'last_norm': row.get('LAST_NORM'),
-                            'nrn_norm': row.get('NRN_NORM'),
-                        }
-                    )
-                    if (i + 1) % 100 == 0:
-                        self.stdout.write(f"Processed {i + 1}/{total_records} records.")
-            self.stdout.write(self.style.SUCCESS(f'Successfully imported {total_records} records from NationalRegister2025.csv'))
+                record = NationalRegister(
+                    nrn=row.get('NRN'),
+                    year=row['YEAR'],
+                    first_name=row.get('FIRST_NAME'),
+                    middle_name=row.get('MIDDLE_NAMES'),
+                    surname=row.get('SURNAME'),
+                    sex=row.get('SEX'),
+                    date_of_birth=row.get('DATE_OF_BIRTH'),
+                    address_line_2=row.get('ADDRESS_LINE_2'),
+                    address_line_3=row.get('ADDRESS_LINE_3'),
+                    parish=row.get('PARISH'),
+                    first_norm=row.get('FIRST_NORM'),
+                    last_norm=row.get('LAST_NORM'),
+                    nrn_norm=row.get('NRN_NORM'),
+                )
+                records_to_create.append(record)
+
+                if (i + 1) % 1000 == 0: # Report progress every 1000 records
+                    self.stdout.write(f"Prepared {i + 1}/{total_records} records for bulk creation.")
+
+            self.stdout.write(f"Attempting to bulk create {len(records_to_create)} records...")
+            NationalRegister.objects.bulk_create(records_to_create)
+            self.stdout.write(self.style.SUCCESS(f'Successfully imported {len(records_to_create)} records from NationalRegister2025.csv'))
 
         except FileNotFoundError:
             self.stderr.write(self.style.ERROR(f'File not found: {csv_file_path}'))
