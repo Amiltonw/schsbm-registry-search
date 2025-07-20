@@ -176,9 +176,9 @@ def search_names(request):
             query = query.filter(last_norm__icontains=last_fragment.lower().strip())
         
         total_results = query.count()
-        if total_results > 50:
+        if total_results > 200:
             truncated = True
-            results = query.order_by('nrn_norm')[:50]
+            results = query.order_by('nrn_norm')[:200]
         else:
             results = query.order_by('nrn_norm')
 
@@ -200,9 +200,9 @@ def search_nrn(request):
         query = NationalRegister.objects.filter(nrn_norm__icontains=frag)
         
         total_results = query.count()
-        if total_results > 50:
+        if total_results > 200:
             truncated = True
-            results = query.order_by('nrn_norm')[:50]
+            results = query.order_by('nrn_norm')[:200]
         else:
             results = query.order_by('nrn_norm')
 
