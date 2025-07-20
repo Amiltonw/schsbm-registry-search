@@ -51,9 +51,9 @@
                         <td>{{ record.first_name }}</td>
                         <td>{{ record.middle_name }}</td>
                         <td>{{ record.surname }}</td>
-                        <td>{{ record.nrn }}<button class="copy-btn" onclick="copyToClipboard('{{ record.nrn }}', this)" title="Copy NRN"><i class="far fa-copy"></i></button></td>
+                        <td>{{ record.nrn|slice:":6" }}-{{ record.nrn|slice:"6:" }}<button class="copy-btn" onclick="copyToClipboard('{{ record.nrn }}', this)" title="Copy NRN"><i class="far fa-copy"></i></button></td>
                         <td>{{ record.sex }}</td>
-                        <td>{{ record.date_of_birth|date:"d/m/Y" }}</td>
+                        <td>{{ record.date_of_birth|date:"M j, Y" }}</td>
                         <td>{{ record.age|default:"N/A" }}</td>
                         <td>{{ record.address_line_2 }}</td>
                         <td>{{ record.address_line_3 }}</td>
