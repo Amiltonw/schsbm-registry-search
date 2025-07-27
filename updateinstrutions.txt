@@ -1,0 +1,82 @@
+
+# Full Steps to Deploy Project to Linode VM
+
+This workflow assumes you have already committed and pushed your changes to your Git repository (e.g., on GitHub).
+
+### Step 1: Connect to Your Linode VM
+First, open a terminal or command prompt and SSH into your server.
+
+```bash
+ssh your_user@your_linode_ip
+```
+
+### Step 2: Navigate to Your Project Directory
+Once connected, go to the directory where your Django project is located. This is the directory that contains your `manage.py` file.
+
+```bash
+cd /path/to/your/project
+```
+
+### Step 3: Pull the Latest Code
+Now, pull the changes you pushed from VS Code. Since your web server (Apache) is likely running as a different user (e.g., `www-data`), you may need to use `sudo` to ensure the permissions are correct after the pull.
+
+```bash
+sudo git pull
+```
+
+### Step 4: Activate Your Virtual Environment
+Activate the Python virtual environment for your project. This ensures you are using the correct Python interpreter and installed packages.
+
+```bash
+source venv/bin/activate
+```
+
+### Step 5: Install or Update Python Dependencies
+Next, update your project's dependencies from the `requirements.txt` file. It's a good practice to run this even if you don't think there are any changes.
+
+```bash
+pip install -r requirements.txt
+```
+
+### Step 6: Collect Static Files
+This command gathers all your static files (CSS, JavaScript, images) into the `STATIC_ROOT` directory so Apache can serve them.
+
+```bash
+python manage.py collectstatic --noinput
+```
+
+### Step 7: Gracefully Reload the Application
+Finally, reload your Django application. As you mentioned, if `touch` requires `sudo`, it's because the `wsgi.py` file is owned by a different user. Using `sudo` with `touch` is the correct approach here.
+
+This command updates the file's modification timestamp, signaling `mod_wsgi` to reload your application with the new code without restarting the entire Apache server.
+
+```bash
+sudo touch nrn_search/wsgi.py
+```
+
+### Summary of Commands
+
+Here is the complete sequence of commands to run on your Linode VM for easy reference:
+
+```bash
+# 1. Connect to your server first
+ssh your_user@your_linode_ip
+
+# 2. Navigate to your project directory
+cd /path/to/your/project
+
+# 3. Pull the latest code
+sudo git pull
+
+# 4. Activate the virtual environment
+source venv/bin/activate
+
+# 5. Install/update Python packages
+pip install -r requirements.txt
+
+# 6. Collect static files
+python manage.py collectstatic --noinput
+
+# 7. Gracefully reload the Django application
+sudo touch nrn_search/wsgi.py
+```
